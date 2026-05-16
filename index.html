@@ -1,947 +1,403 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Estrategia Trading · Bitget</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Bitget Strategy · Trading System</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0c0f;
-    --surface: #111418;
-    --border: #1e2328;
-    --border2: #2a3040;
-    --text: #c8d0dc;
-    --muted: #5a6478;
-    --green: #00e676;
-    --green-dim: #00b85c;
-    --red: #ff3d5a;
-    --red-dim: #c4002f;
-    --yellow: #ffc107;
-    --blue: #4fc3f7;
-    --accent: #00e676;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    line-height: 1.6;
-    padding: 0 0 60px 0;
-  }
-
-  /* HEADER */
-  .header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 20px 24px 16px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .header-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-  }
-  .logo {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--green);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .version {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-  }
-
-  /* NAV TABS */
-  .nav {
-    display: flex;
-    gap: 4px;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .nav::-webkit-scrollbar { display: none; }
-  .tab {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted);
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    white-space: nowrap;
-    border: 1px solid transparent;
-    background: none;
-    transition: all 0.15s;
-  }
-  .tab:hover { color: var(--text); border-color: var(--border2); }
-  .tab.active { color: var(--green); border-color: var(--green); background: rgba(0,230,118,0.06); }
-
-  /* SECTIONS */
-  .section { display: none; padding: 20px 16px; }
-  .section.active { display: block; }
-
-  /* SECTION TITLE */
-  .section-title {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  /* CARDS */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 12px;
-  }
-  .card-title {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--blue);
-    margin-bottom: 12px;
-  }
-
-  /* FLOW STEPS */
-  .flow {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .flow-step {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 12px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-    background: rgba(255,255,255,0.015);
-  }
-  .step-num {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--green);
-    min-width: 20px;
-    padding-top: 1px;
-  }
-  .step-body {}
-  .step-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--text);
-    margin-bottom: 3px;
-  }
-  .step-desc {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.5;
-  }
-  .step-rule {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    color: var(--yellow);
-    margin-top: 4px;
-  }
-
-  /* CHECKLIST */
-  .checklist { display: flex; flex-direction: column; gap: 8px; }
-  .check-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 12px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-    cursor: pointer;
-    transition: border-color 0.15s;
-    user-select: none;
-  }
-  .check-item:hover { border-color: var(--border2); }
-  .check-item.checked { border-color: var(--green-dim); background: rgba(0,230,118,0.04); }
-  .check-box {
-    width: 18px;
-    height: 18px;
-    border: 1.5px solid var(--border2);
-    border-radius: 3px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-top: 1px;
-    transition: all 0.15s;
-  }
-  .check-item.checked .check-box {
-    background: var(--green);
-    border-color: var(--green);
-  }
-  .check-tick {
-    display: none;
-    width: 10px;
-    height: 10px;
-  }
-  .check-item.checked .check-tick { display: block; }
-  .check-content {}
-  .check-label {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text);
-    margin-bottom: 2px;
-  }
-  .check-sub {
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.4;
-  }
-  .check-critical {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    color: var(--red);
-    letter-spacing: 0.05em;
-  }
-
-  /* SCORE BAR */
-  .score-widget {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-  }
-  .score-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-  .score-display {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 28px;
-    font-weight: 600;
-    color: var(--green);
-    line-height: 1;
-  }
-  .score-display.warn { color: var(--yellow); }
-  .score-display.fail { color: var(--red); }
-  .score-verdict {
-    font-size: 12px;
-    margin-top: 4px;
-  }
-  .score-bars {
-    display: flex;
-    gap: 4px;
-    align-items: flex-end;
-  }
-  .score-bar {
-    width: 14px;
-    height: 32px;
-    border-radius: 3px;
-    background: var(--border2);
-    transition: background 0.2s;
-  }
-  .score-bar.filled { background: var(--green); }
-  .score-bar.warn { background: var(--yellow); }
-  .score-bar.fail { background: var(--red); }
-  .score-reset {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    cursor: pointer;
-    padding: 6px 10px;
-    border: 1px solid var(--border2);
-    border-radius: 4px;
-    background: none;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    transition: all 0.15s;
-  }
-  .score-reset:hover { color: var(--text); border-color: var(--text); }
-
-  /* TABLE */
-  .data-table { width: 100%; border-collapse: collapse; }
-  .data-table th {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--muted);
-    padding: 8px 0;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-  }
-  .data-table td {
-    padding: 10px 0;
-    font-size: 13px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text);
-    vertical-align: top;
-  }
-  .data-table td:first-child { color: var(--muted); font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding-right: 16px; white-space: nowrap; }
-  .data-table tr:last-child td { border-bottom: none; }
-
-  /* PILL BADGES */
-  .pill {
-    display: inline-block;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: 3px;
-  }
-  .pill-green { background: rgba(0,230,118,0.12); color: var(--green); }
-  .pill-red { background: rgba(255,61,90,0.12); color: var(--red); }
-  .pill-yellow { background: rgba(255,193,7,0.12); color: var(--yellow); }
-  .pill-blue { background: rgba(79,195,247,0.12); color: var(--blue); }
-
-  /* ALERT */
-  .alert {
-    border-radius: 6px;
-    padding: 12px 14px;
-    margin-bottom: 12px;
-    font-size: 13px;
-    line-height: 1.5;
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-  }
-  .alert-red { background: rgba(255,61,90,0.08); border: 1px solid rgba(255,61,90,0.25); color: var(--red); }
-  .alert-green { background: rgba(0,230,118,0.06); border: 1px solid rgba(0,230,118,0.2); color: var(--green); }
-  .alert-yellow { background: rgba(255,193,7,0.07); border: 1px solid rgba(255,193,7,0.2); color: var(--yellow); }
-  .alert-icon { font-size: 14px; flex-shrink: 0; padding-top: 1px; }
-
-  /* CALC */
-  .calc-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-    align-items: flex-end;
-  }
-  .calc-field { flex: 1; }
-  .calc-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 6px;
-  }
-  .calc-input {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border2);
-    border-radius: 6px;
-    padding: 10px 12px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 14px;
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .calc-input:focus { border-color: var(--green); }
-  .calc-result {
-    background: rgba(0,230,118,0.06);
-    border: 1px solid rgba(0,230,118,0.2);
-    border-radius: 8px;
-    padding: 16px;
-    margin-top: 6px;
-  }
-  .calc-result-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6px 0;
-    border-bottom: 1px solid rgba(0,230,118,0.1);
-    font-size: 13px;
-  }
-  .calc-result-row:last-child { border-bottom: none; }
-  .calc-result-key { color: var(--muted); }
-  .calc-result-val {
-    font-family: 'IBM Plex Mono', monospace;
-    font-weight: 600;
-    color: var(--green);
-  }
-  .calc-result-val.warn { color: var(--yellow); }
-  .calc-result-val.fail { color: var(--red); }
-  .calc-btn {
-    width: 100%;
-    background: var(--green);
-    color: #000;
-    border: none;
-    border-radius: 6px;
-    padding: 12px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    cursor: pointer;
-    margin-top: 12px;
-    transition: background 0.15s;
-  }
-  .calc-btn:hover { background: var(--green-dim); }
-
-  /* INVALIDATION LIST */
-  .inv-list { display: flex; flex-direction: column; gap: 6px; }
-  .inv-item {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    padding: 10px 12px;
-    border-radius: 6px;
-    background: rgba(255,61,90,0.04);
-    border: 1px solid rgba(255,61,90,0.12);
-  }
-  .inv-icon { color: var(--red); font-size: 12px; padding-top: 2px; flex-shrink: 0; }
-  .inv-text { font-size: 13px; color: var(--text); line-height: 1.4; }
-  .inv-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-  /* PAIRS TABLE */
-  .pairs-grid { display: flex; flex-direction: column; gap: 8px; }
-  .pair-card {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  .pair-header {
-    padding: 10px 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .pair-cat { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
-  .pair-header.cat-a { background: rgba(0,230,118,0.06); border-bottom: 1px solid rgba(0,230,118,0.12); }
-  .pair-header.cat-b { background: rgba(79,195,247,0.06); border-bottom: 1px solid rgba(79,195,247,0.12); }
-  .pair-header.cat-c { background: rgba(255,61,90,0.06); border-bottom: 1px solid rgba(255,61,90,0.12); }
-  .pair-header.cat-a .pair-cat { color: var(--green); }
-  .pair-header.cat-b .pair-cat { color: var(--blue); }
-  .pair-header.cat-c .pair-cat { color: var(--red); }
-  .pair-body { padding: 12px 14px; }
-  .pair-row { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; }
-  .pair-key { color: var(--muted); }
-  .pair-val { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text); }
-
-  /* SESSIONS */
-  .sessions { display: flex; flex-direction: column; gap: 8px; }
-  .session {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    padding: 12px;
-    border-radius: 6px;
-    border: 1px solid var(--border);
-  }
-  .session-time {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--green);
-    min-width: 90px;
-    padding-top: 2px;
-  }
-  .session-time.restricted { color: var(--red); }
-  .session-info {}
-  .session-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
-  .session-sub { font-size: 12px; color: var(--muted); }
-
-  /* DIVIDER */
-  .divider { height: 1px; background: var(--border); margin: 16px 0; }
-
-  /* MONO TEXT */
-  .mono { font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
-
-  /* FORMULA BOX */
-  .formula {
-    background: var(--bg);
-    border: 1px solid var(--border2);
-    border-radius: 6px;
-    padding: 14px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-    color: var(--green);
-    text-align: center;
-    margin: 12px 0;
-    letter-spacing: 0.03em;
-  }
-
-  /* STACK */
-  .stack { display: flex; flex-direction: column; gap: 12px; }
-
-  /* TWO COL */
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  @media (max-width: 400px) { .two-col { grid-template-columns: 1fr; } }
-
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px;
-    text-align: center;
-  }
-  .stat-val {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 22px;
-    font-weight: 600;
-    color: var(--green);
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-  .stat-key {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  /* SCROLL TOP */
-  html { scroll-behavior: smooth; }
+:root {
+  --bg: #050712;
+  --bg2: #080d1c;
+  --glass: rgba(255,255,255,0.04);
+  --glass-border: rgba(255,255,255,0.08);
+  --glass-hover: rgba(255,255,255,0.07);
+  --text: #e8eaf6;
+  --muted: #7b82a8;
+  --green: #00f5a0;
+  --green2: #00d68f;
+  --blue: #4fc3f7;
+  --purple: #a78bfa;
+  --pink: #f472b6;
+  --red: #ff4d6d;
+  --yellow: #fbbf24;
+  --grad1: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  --grad2: linear-gradient(135deg, #06b6d4 0%, #6366f1 100%);
+  --grad-green: linear-gradient(135deg, #00f5a0 0%, #00d4ff 100%);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+.orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.18;
+  pointer-events: none;
+  z-index: 0;
+  animation: orbFloat 12s ease-in-out infinite;
+}
+.orb1 { width: 400px; height: 400px; background: #6366f1; top: -120px; right: -100px; animation-delay: 0s; }
+.orb2 { width: 300px; height: 300px; background: #ec4899; bottom: 20%; left: -80px; animation-delay: -4s; }
+.orb3 { width: 250px; height: 250px; background: #00f5a0; bottom: 10%; right: 0; opacity: 0.1; animation-delay: -8s; }
+@keyframes orbFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-30px) scale(1.05); }
+}
+.header {
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(20px);
+  background: rgba(5,7,18,0.85);
+  border-bottom: 1px solid var(--glass-border);
+  padding: 14px 20px;
+}
+.header-inner { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.logo {
+  font-size: 16px; font-weight: 800;
+  background: var(--grad-green);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  letter-spacing: -0.02em;
+}
+.logo span { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 400; color: var(--muted); -webkit-text-fill-color: var(--muted); display: block; margin-top: -2px; letter-spacing: 0.08em; }
+.badge { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3); color: var(--purple); }
+.nav { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.nav::-webkit-scrollbar { display: none; }
+.tab { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); padding: 7px 14px; border-radius: 20px; cursor: pointer; white-space: nowrap; border: 1px solid transparent; background: none; transition: all 0.2s; }
+.tab:hover { color: var(--text); background: var(--glass); border-color: var(--glass-border); }
+.tab.active { color: #000; background: var(--green); border-color: var(--green); font-weight: 700; }
+.section { display: none; padding: 24px 16px 50px; position: relative; z-index: 1; }
+.section.active { display: block; }
+.hero {
+  background: linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(168,85,247,0.1) 50%, rgba(236,72,153,0.08) 100%);
+  border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px 20px; margin-bottom: 20px; position: relative; overflow: hidden;
+}
+.hero-tag { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--purple); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.hero-tag::before { content: ''; width: 20px; height: 1px; background: var(--purple); }
+.hero h2 { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 8px; background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero p { font-size: 14px; color: var(--muted); line-height: 1.5; }
+.section-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--glass-border); }
+.card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 16px; padding: 18px; margin-bottom: 12px; backdrop-filter: blur(10px); position: relative; overflow: hidden; transition: border-color 0.2s; }
+.card:hover { border-color: rgba(255,255,255,0.13); }
+.card-glow { position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(99,102,241,0.5), transparent); }
+.card-title { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--purple); margin-bottom: 14px; }
+.card-title-green { color: var(--green); }
+.flow { display: flex; flex-direction: column; gap: 10px; }
+.flow-step { display: flex; gap: 14px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); transition: all 0.2s; }
+.flow-step:hover { background: rgba(255,255,255,0.05); border-color: rgba(99,102,241,0.3); }
+.step-num { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, rgba(99,102,241,0.3), rgba(168,85,247,0.2)); border: 1px solid rgba(99,102,241,0.4); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 700; color: var(--purple); flex-shrink: 0; }
+.step-label { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.step-desc { font-size: 13px; color: var(--muted); line-height: 1.45; }
+.step-rule { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--yellow); margin-top: 5px; padding: 3px 8px; background: rgba(251,191,36,0.08); border-radius: 4px; border-left: 2px solid var(--yellow); display: inline-block; }
+.alert { border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; font-size: 13px; line-height: 1.5; display: flex; gap: 10px; align-items: flex-start; }
+.alert-red { background: rgba(255,77,109,0.08); border: 1px solid rgba(255,77,109,0.2); color: #ff8fa3; }
+.alert-green { background: rgba(0,245,160,0.06); border: 1px solid rgba(0,245,160,0.2); color: var(--green); }
+.alert-yellow { background: rgba(251,191,36,0.07); border: 1px solid rgba(251,191,36,0.2); color: var(--yellow); }
+.alert-icon { font-size: 15px; flex-shrink: 0; }
+.score-widget { background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.08)); border: 1px solid rgba(99,102,241,0.25); border-radius: 16px; padding: 20px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
+.score-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.score-display { font-size: 42px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; background: var(--grad-green); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.score-display.warn { background: linear-gradient(135deg, var(--yellow), #f97316); -webkit-background-clip: text; background-clip: text; }
+.score-display.fail { background: linear-gradient(135deg, var(--red), #f97316); -webkit-background-clip: text; background-clip: text; }
+.score-verdict { font-size: 13px; margin-top: 5px; }
+.score-bars { display: flex; gap: 5px; align-items: flex-end; }
+.score-bar { width: 16px; height: 36px; border-radius: 5px; background: rgba(255,255,255,0.08); transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+.score-bar.filled { background: linear-gradient(180deg, var(--green), var(--green2)); }
+.score-bar.warn { background: linear-gradient(180deg, var(--yellow), #f97316); }
+.score-bar.fail { background: linear-gradient(180deg, var(--red), #c2185b); }
+.checklist { display: flex; flex-direction: column; gap: 8px; }
+.check-item { display: flex; gap: 14px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; background: var(--glass); border: 1px solid var(--glass-border); cursor: pointer; transition: all 0.2s; user-select: none; }
+.check-item:hover { border-color: rgba(255,255,255,0.13); background: var(--glass-hover); }
+.check-item.checked { border-color: rgba(0,245,160,0.3); background: rgba(0,245,160,0.05); }
+.check-box { width: 22px; height: 22px; border-radius: 6px; border: 1.5px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; transition: all 0.2s; background: rgba(255,255,255,0.03); }
+.check-item.checked .check-box { background: var(--green); border-color: var(--green); box-shadow: 0 0 12px rgba(0,245,160,0.4); }
+.check-tick { display: none; width: 12px; height: 12px; }
+.check-item.checked .check-tick { display: block; }
+.check-label { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.check-sub { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.check-critical { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--red); letter-spacing: 0.05em; margin-top: 4px; }
+.btn-ghost { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); cursor: pointer; padding: 8px 14px; border: 1px solid var(--glass-border); border-radius: 8px; background: none; transition: all 0.2s; }
+.btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.2); background: var(--glass); }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 8px 0; text-align: left; border-bottom: 1px solid var(--glass-border); }
+.data-table td { padding: 11px 0; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--text); vertical-align: top; }
+.data-table td:first-child { color: var(--muted); font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding-right: 16px; white-space: nowrap; }
+.data-table tr:last-child td { border-bottom: none; }
+.pill { display: inline-flex; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; }
+.pill-green { background: rgba(0,245,160,0.12); color: var(--green); border: 1px solid rgba(0,245,160,0.25); }
+.pill-red { background: rgba(255,77,109,0.12); color: #ff8fa3; border: 1px solid rgba(255,77,109,0.25); }
+.pill-yellow { background: rgba(251,191,36,0.1); color: var(--yellow); border: 1px solid rgba(251,191,36,0.25); }
+.pill-blue { background: rgba(79,195,247,0.1); color: var(--blue); border: 1px solid rgba(79,195,247,0.25); }
+.calc-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
+.calc-input { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 11px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 15px; color: var(--text); outline: none; transition: all 0.2s; }
+.calc-input:focus { border-color: rgba(99,102,241,0.5); background: rgba(99,102,241,0.06); box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+.calc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.calc-field {}
+.calc-result { background: linear-gradient(135deg, rgba(0,245,160,0.06), rgba(0,212,255,0.04)); border: 1px solid rgba(0,245,160,0.2); border-radius: 12px; padding: 16px; margin-top: 8px; }
+.calc-result-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(0,245,160,0.08); font-size: 13px; }
+.calc-result-row:last-child { border-bottom: none; }
+.calc-result-key { color: var(--muted); }
+.calc-result-val { font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: var(--green); font-size: 13px; }
+.calc-result-val.warn { color: var(--yellow); }
+.calc-result-val.fail { color: var(--red); }
+.formula { background: rgba(255,255,255,0.03); border: 1px solid rgba(99,102,241,0.2); border-radius: 10px; padding: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--green); text-align: center; margin: 14px 0; }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stat-card { background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.07)); border: 1px solid rgba(99,102,241,0.2); border-radius: 14px; padding: 16px; text-align: center; }
+.stat-val { font-size: 30px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; margin-bottom: 5px; background: var(--grad-green); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.stat-key { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.pair-card { border-radius: 14px; overflow: hidden; margin-bottom: 10px; border: 1px solid var(--glass-border); }
+.pair-header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+.pair-cat { font-weight: 700; font-size: 14px; }
+.pair-header.cat-a { background: linear-gradient(135deg, rgba(0,245,160,0.1), rgba(0,212,255,0.07)); border-bottom: 1px solid rgba(0,245,160,0.15); }
+.pair-header.cat-b { background: linear-gradient(135deg, rgba(79,195,247,0.1), rgba(99,102,241,0.07)); border-bottom: 1px solid rgba(79,195,247,0.15); }
+.pair-header.cat-c { background: linear-gradient(135deg, rgba(255,77,109,0.1), rgba(251,113,133,0.06)); border-bottom: 1px solid rgba(255,77,109,0.15); }
+.pair-header.cat-a .pair-cat { color: var(--green); }
+.pair-header.cat-b .pair-cat { color: var(--blue); }
+.pair-header.cat-c .pair-cat { color: var(--red); }
+.pair-body { background: var(--glass); padding: 12px 16px; }
+.pair-row { display: flex; justify-content: space-between; font-size: 13px; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.pair-row:last-child { border-bottom: none; }
+.pair-key { color: var(--muted); }
+.pair-val { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text); font-weight: 500; }
+.session { display: flex; gap: 14px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; background: var(--glass); border: 1px solid var(--glass-border); margin-bottom: 8px; transition: border-color 0.2s; }
+.session:hover { border-color: rgba(99,102,241,0.3); }
+.session.restricted { background: rgba(255,77,109,0.04); border-color: rgba(255,77,109,0.12); }
+.session-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; margin-top: 7px; box-shadow: 0 0 8px rgba(0,245,160,0.5); }
+.session.restricted .session-dot { background: var(--red); box-shadow: 0 0 8px rgba(255,77,109,0.5); }
+.session-time { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; color: var(--green); min-width: 98px; }
+.session.restricted .session-time { color: var(--red); }
+.session-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.session-sub { font-size: 12px; color: var(--muted); }
+.inv-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 10px; background: rgba(255,77,109,0.04); border: 1px solid rgba(255,77,109,0.1); margin-bottom: 7px; }
+.inv-item:hover { border-color: rgba(255,77,109,0.25); }
+.inv-x { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 700; color: var(--red); flex-shrink: 0; padding-top: 2px; }
+.inv-text { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.4; }
+.inv-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.rule-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 14px; padding: 18px; margin-bottom: 12px; position: relative; overflow: hidden; }
+.rule-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--grad1); }
+.divider { height: 1px; background: var(--glass-border); margin: 18px 0; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.section.active > * { animation: fadeInUp 0.35s ease both; }
+.section.active > *:nth-child(1) { animation-delay: 0s; }
+.section.active > *:nth-child(2) { animation-delay: 0.06s; }
+.section.active > *:nth-child(3) { animation-delay: 0.12s; }
+.section.active > *:nth-child(4) { animation-delay: 0.18s; }
+.section.active > *:nth-child(5) { animation-delay: 0.24s; }
 </style>
 </head>
 <body>
 
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
 <div class="header">
-  <div class="header-top">
-    <div class="logo">▲ Bitget Strategy</div>
-    <div class="version">v2.0 · Mayo 2026</div>
+  <div class="header-inner">
+    <div class="logo">Bitget Strategy<span>Multi-Temporalidad · v2.0</span></div>
+    <div class="badge">Mayo 2026</div>
   </div>
   <nav class="nav">
-    <button class="tab active" onclick="showTab('flujo')">Flujo</button>
-    <button class="tab" onclick="showTab('checklist')">Checklist 4H</button>
-    <button class="tab" onclick="showTab('calc')">Calculadora</button>
-    <button class="tab" onclick="showTab('pares')">Pares</button>
-    <button class="tab" onclick="showTab('invalida')">Invalidación</button>
-    <button class="tab" onclick="showTab('sesiones')">Sesiones</button>
-    <button class="tab" onclick="showTab('gestion')">Gestión</button>
+    <button class="tab active" onclick="showTab('flujo',this)">Flujo</button>
+    <button class="tab" onclick="showTab('checklist',this)">Checklist</button>
+    <button class="tab" onclick="showTab('calc',this)">Calc</button>
+    <button class="tab" onclick="showTab('pares',this)">Pares</button>
+    <button class="tab" onclick="showTab('invalida',this)">Invalidación</button>
+    <button class="tab" onclick="showTab('sesiones',this)">Sesiones</button>
+    <button class="tab" onclick="showTab('gestion',this)">Gestión</button>
   </nav>
 </div>
 
-<!-- ─── FLUJO ─── -->
+<!-- FLUJO -->
+
 <div id="flujo" class="section active">
-  <div class="section-title">Flujo de Decisión</div>
-
-  <div class="alert alert-yellow">
-    <span class="alert-icon">⚡</span>
-    <span>Diario → 4H → 15M. <strong>Orden estricto, sin saltar pasos.</strong></span>
+  <div class="hero">
+    <div class="hero-tag">Sistema de Decisión</div>
+    <h2>Diario → 4H → 15M</h2>
+    <p>Orden estricto. Sin saltar pasos. La mayoría de días no habrá nada que hacer — eso es correcto.</p>
   </div>
-
+  <div class="section-label">6 Pasos del Sistema</div>
   <div class="flow">
-    <div class="flow-step">
-      <div class="step-num">1</div>
-      <div class="step-body">
-        <div class="step-label">Diario · Dirección</div>
-        <div class="step-desc">EMA 50D: precio encima = solo largos · precio debajo = solo cortos · tocando = no operas</div>
-        <div class="step-rule">Par Cat A/B · BTC no cae fuerte</div>
-      </div>
-    </div>
-    <div class="flow-step">
-      <div class="step-num">2</div>
-      <div class="step-body">
-        <div class="step-label">4H · Zona S/R</div>
-        <div class="step-desc">Precio en zona válida: 2+ toques, últimas 8 semanas, rango con grosor. Si no → crea alerta, espera.</div>
-      </div>
-    </div>
-    <div class="flow-step">
-      <div class="step-num">3</div>
-      <div class="step-body">
-        <div class="step-label">4H · Checklist</div>
-        <div class="step-desc">Score ≥ 3/5 condiciones. EMA 21, Zona, Vela, Volumen, Cipher B.</div>
-        <div class="step-rule">Si score &lt; 3 → no hay trade</div>
-      </div>
-    </div>
-    <div class="flow-step">
-      <div class="step-num">4</div>
-      <div class="step-body">
-        <div class="step-label">15M · Entrada</div>
-        <div class="step-desc">Vela de rechazo clara con volumen. Entrada al cierre de la vela, nunca antes.</div>
-        <div class="step-rule">R/R ≥ 1:2 (o 1:2.5 mid-caps) → si no: no entras</div>
-      </div>
-    </div>
-    <div class="flow-step">
-      <div class="step-num">5</div>
-      <div class="step-body">
-        <div class="step-label">Ejecución</div>
-        <div class="step-desc">Tamaño = Capital × 1% / SL(%). Pon SL y TP en Bitget antes de confirmar.</div>
-      </div>
-    </div>
-    <div class="flow-step">
-      <div class="step-num">6</div>
-      <div class="step-body">
-        <div class="step-label">Gestión Post-Entrada</div>
-        <div class="step-desc">Break even al 50% del recorrido hacia TP. Salida parcial según movimiento.</div>
-      </div>
-    </div>
+    <div class="flow-step"><div class="step-num">1</div><div><div class="step-label">Diario · Dirección del mercado</div><div class="step-desc">EMA 50D: precio encima = solo largos · debajo = solo cortos · tocando = no operas</div><div class="step-rule">Par Cat A/B · BTC no cae fuerte · ventana activa</div></div></div>
+    <div class="flow-step"><div class="step-num">2</div><div><div class="step-label">4H · Zona S/R válida</div><div class="step-desc">2+ toques rebotados, últimas 8 semanas, zona con grosor. Si no → crea alerta, espera.</div></div></div>
+    <div class="flow-step"><div class="step-num">3</div><div><div class="step-label">4H · Checklist mínimo 3/5</div><div class="step-desc">EMA 21, Zona S/R, Patrón vela, Volumen, Cipher B.</div><div class="step-rule">Si score &lt; 3 → no hay trade</div></div></div>
+    <div class="flow-step"><div class="step-num">4</div><div><div class="step-label">15M · Entrada de precisión</div><div class="step-desc">Vela de rechazo con volumen. Entrada al cierre de la vela, nunca antes.</div><div class="step-rule">R/R ≥ 1:2 (mid-caps 1:2.5) · si no: no entras</div></div></div>
+    <div class="flow-step"><div class="step-num">5</div><div><div class="step-label">Ejecución</div><div class="step-desc">Tamaño = Capital × 1% / SL(%). Pon SL y TP en Bitget antes de confirmar.</div></div></div>
+    <div class="flow-step"><div class="step-num">6</div><div><div class="step-label">Gestión Post-Entrada</div><div class="step-desc">Break even al 50% del recorrido. Salida parcial según tipo de movimiento.</div></div></div>
   </div>
-
   <div class="divider"></div>
-  <div class="card">
-    <div class="card-title">Estadísticas del Sistema</div>
-    <div class="two-col">
-      <div class="stat-card"><div class="stat-val">57%</div><div class="stat-key">Win Rate</div></div>
-      <div class="stat-card"><div class="stat-val">1.55</div><div class="stat-key">Ratio B/R</div></div>
-      <div class="stat-card"><div class="stat-val">~80</div><div class="stat-key">Trades/año</div></div>
-      <div class="stat-card"><div class="stat-val">+0.45</div><div class="stat-key">Esp. Matemática</div></div>
-    </div>
-    <div class="formula">(0.57 × 1.55) − (0.43 × 1) = +0.45 / operación</div>
+  <div class="section-label">Estadísticas auditadas</div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-val">57%</div><div class="stat-key">Win Rate</div></div>
+    <div class="stat-card"><div class="stat-val">1.55</div><div class="stat-key">Ratio B/R</div></div>
+    <div class="stat-card"><div class="stat-val">~80</div><div class="stat-key">Trades / año</div></div>
+    <div class="stat-card"><div class="stat-val">+0.45</div><div class="stat-key">Esp. Mat.</div></div>
   </div>
+  <div class="formula">(0.57 × 1.55) − (0.43 × 1) = <span style="color:#fff">+0.45</span> / operación</div>
 </div>
 
-<!-- ─── CHECKLIST ─── -->
-<div id="checklist" class="section">
-  <div class="section-title">Checklist 4H</div>
+<!-- CHECKLIST -->
 
+<div id="checklist" class="section">
   <div class="score-widget">
     <div>
-      <div class="score-label">Score 4H</div>
+      <div class="score-label">Score Checklist 4H</div>
       <div class="score-display" id="score-display">0/5</div>
-      <div class="score-verdict" id="score-verdict" style="color:var(--muted)">Marca condiciones</div>
+      <div class="score-verdict" id="score-verdict" style="color:var(--muted)">Marca las condiciones</div>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
       <div class="score-bars" id="score-bars">
-        <div class="score-bar" data-idx="0"></div>
-        <div class="score-bar" data-idx="1"></div>
-        <div class="score-bar" data-idx="2"></div>
-        <div class="score-bar" data-idx="3"></div>
-        <div class="score-bar" data-idx="4"></div>
+        <div class="score-bar"></div><div class="score-bar"></div><div class="score-bar"></div><div class="score-bar"></div><div class="score-bar"></div>
       </div>
-      <button class="score-reset" onclick="resetChecklist()">Reset</button>
+      <button class="btn-ghost" onclick="resetChecklist()">Reset</button>
     </div>
   </div>
-
-  <div class="alert alert-red">
-    <span class="alert-icon">⛔</span>
-    <span>EMA 21 plana = NO OPERAR. Sin excepciones aunque se cumplan todas las demás.</span>
+  <div class="alert alert-red"><span class="alert-icon">⛔</span><span><strong>EMA 21 plana = NO OPERAR.</strong> Sin excepciones, aunque el resto sea perfecto.</span></div>
+  <div class="section-label">Condiciones 4H</div>
+  <div class="checklist">
+    <div class="check-item" onclick="toggleCheck(this,0)"><div class="check-box"><svg class="check-tick" viewBox="0 0 12 12" fill="none"><polyline points="1.5,6 4.5,9 10.5,2" stroke="#050712" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="check-label">1 · EMA 21 con pendiente clara</div><div class="check-sub">Inclinación visible en 4H. Horizontal = mercado indeciso.</div><div class="check-critical">⬡ CRÍTICO · Si falla: no hay trade</div></div></div>
+    <div class="check-item" onclick="toggleCheck(this,1)"><div class="check-box"><svg class="check-tick" viewBox="0 0 12 12" fill="none"><polyline points="1.5,6 4.5,9 10.5,2" stroke="#050712" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="check-label">2 · Precio en zona S/R válida</div><div class="check-sub">2+ toques rebotados · últimas 8 semanas · zona con grosor</div><div class="check-critical">⬡ CRÍTICO · Si fallan C1+C2 juntas: no hay trade</div></div></div>
+    <div class="check-item" onclick="toggleCheck(this,2)"><div class="check-box"><svg class="check-tick" viewBox="0 0 12 12" fill="none"><polyline points="1.5,6 4.5,9 10.5,2" stroke="#050712" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="check-label">3 · Patrón de vela en la zona</div><div class="check-sub">Largos: martillo o envolvente alcista · Cortos: estrella fugaz o envolvente bajista</div></div></div>
+    <div class="check-item" onclick="toggleCheck(this,3)"><div class="check-box"><svg class="check-tick" viewBox="0 0 12 12" fill="none"><polyline points="1.5,6 4.5,9 10.5,2" stroke="#050712" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="check-label">4 · Confirmación de volumen</div><div class="check-sub">Retroceso+vol.bajo ✓ · Rebote+vol.alto ✓ · Ruptura+vol.alto ✗ invalida · Rebote+vol.muy bajo → 0.5%</div></div></div>
+    <div class="check-item" onclick="toggleCheck(this,4)"><div class="check-box"><svg class="check-tick" viewBox="0 0 12 12" fill="none"><polyline points="1.5,6 4.5,9 10.5,2" stroke="#050712" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="check-label">5 · Cipher B <span style="color:var(--purple);font-size:11px">(opcional, sube prioridad)</span></div><div class="check-sub">2 de 3: punto verde/dorado &lt;−40 · WaveTrend cruzando desde sobreventa · fondo rojo→verde</div></div></div>
   </div>
-
-  <div class="checklist" id="checklist-items">
-    <div class="check-item" onclick="toggleCheck(this, 0)">
-      <div class="check-box">
-        <svg class="check-tick" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5 4,7.5 8.5,2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <div class="check-content">
-        <div class="check-label">1 · EMA 21 con pendiente clara</div>
-        <div class="check-sub">Inclinación visible en 4H. Si está horizontal → mercado indeciso.</div>
-        <div class="check-critical">CRÍTICO · Si falla: no hay trade</div>
-      </div>
-    </div>
-    <div class="check-item" onclick="toggleCheck(this, 1)">
-      <div class="check-box">
-        <svg class="check-tick" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5 4,7.5 8.5,2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <div class="check-content">
-        <div class="check-label">2 · Precio en zona S/R válida</div>
-        <div class="check-sub">2+ toques rebotados, últimas 8 semanas, zona con grosor. Si está en medio del rango → espera.</div>
-        <div class="check-critical">CRÍTICO · Si fallan C1 y C2 juntas: no hay trade</div>
-      </div>
-    </div>
-    <div class="check-item" onclick="toggleCheck(this, 2)">
-      <div class="check-box">
-        <svg class="check-tick" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5 4,7.5 8.5,2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <div class="check-content">
-        <div class="check-label">3 · Patrón de vela en la zona</div>
-        <div class="check-sub">Largos: martillo o envolvente alcista · Cortos: estrella fugaz o envolvente bajista</div>
-      </div>
-    </div>
-    <div class="check-item" onclick="toggleCheck(this, 3)">
-      <div class="check-box">
-        <svg class="check-tick" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5 4,7.5 8.5,2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <div class="check-content">
-        <div class="check-label">4 · Confirmación de volumen</div>
-        <div class="check-sub">Retroceso + vol. bajo ✓ · Rebote + vol. alto ✓ · Ruptura + vol. alto ✗ invalida · Rebote + vol. muy bajo → reduce posición al 0.5%</div>
-      </div>
-    </div>
-    <div class="check-item" onclick="toggleCheck(this, 4)">
-      <div class="check-box">
-        <svg class="check-tick" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5 4,7.5 8.5,2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <div class="check-content">
-        <div class="check-label">5 · Cipher B (Opcional, sube prioridad)</div>
-        <div class="check-sub">2 de 3: punto verde/dorado &lt;−40 · WaveTrend cruzando desde sobreventa · Fondo cambiando rojo→verde</div>
-      </div>
-    </div>
-  </div>
-
   <div class="divider"></div>
+  <div class="section-label">Confirmación 15M</div>
   <div class="card">
-    <div class="card-title">Confirmación 15M</div>
-    <div class="stack">
-      <div style="font-size:13px;color:var(--muted)">Una vez score ≥ 3/5, bajas a 15M:</div>
-      <div class="check-item" onclick="toggleCheck(this, 5)" style="opacity:0.85">
-        <div class="check-box"><svg class="check-tick" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5 4,7.5 8.5,2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <div class="check-content"><div class="check-label">Vela de rechazo clara</div><div class="check-sub">Mecha larga en dirección opuesta, volumen superior a las 3-4 velas anteriores</div></div>
-      </div>
-      <div class="check-item" onclick="toggleCheck(this, 6)" style="opacity:0.85">
-        <div class="check-box"><svg class="check-tick" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5 4,7.5 8.5,2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <div class="check-content"><div class="check-label">SL definido bajo/sobre mecha 15M</div><div class="check-sub">No del soporte 4H. Añade margen por spread/slippage.</div></div>
-      </div>
-      <div class="check-item" onclick="toggleCheck(this, 7)" style="opacity:0.85">
-        <div class="check-box"><svg class="check-tick" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5 4,7.5 8.5,2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <div class="check-content"><div class="check-label">R/R calculado ≥ 1:2</div><div class="check-sub">R/R = |TP − Entrada| / |Entrada − SL|. Si no llega: no entras.</div></div>
-      </div>
+    <div class="card-glow"></div>
+    <div class="card-title card-title-green">Una vez score ≥ 3/5</div>
+    <div class="checklist">
+      <div class="check-item" onclick="toggleCheck(this,5)"><div class="check-box"><svg class="check-tick" viewBox="0 0 12 12" fill="none"><polyline points="1.5,6 4.5,9 10.5,2" stroke="#050712" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="check-label">Vela de rechazo clara</div><div class="check-sub">Mecha larga en dirección opuesta, volumen superior a las 3-4 velas anteriores</div></div></div>
+      <div class="check-item" onclick="toggleCheck(this,6)"><div class="check-box"><svg class="check-tick" viewBox="0 0 12 12" fill="none"><polyline points="1.5,6 4.5,9 10.5,2" stroke="#050712" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="check-label">SL definido bajo/sobre mecha 15M</div><div class="check-sub">No del soporte 4H. Añade margen por spread/slippage.</div></div></div>
+      <div class="check-item" onclick="toggleCheck(this,7)"><div class="check-box"><svg class="check-tick" viewBox="0 0 12 12" fill="none"><polyline points="1.5,6 4.5,9 10.5,2" stroke="#050712" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="check-label">R/R calculado ≥ 1:2</div><div class="check-sub">|TP − Entrada| / |Entrada − SL|. Si no llega: no entras.</div></div></div>
     </div>
   </div>
 </div>
 
-<!-- ─── CALCULADORA ─── -->
-<div id="calc" class="section">
-  <div class="section-title">Calculadora de Posición</div>
+<!-- CALCULADORA -->
 
+<div id="calc" class="section">
+  <div class="hero" style="background:linear-gradient(135deg,rgba(0,245,160,0.08),rgba(0,212,255,0.06));border-color:rgba(0,245,160,0.15)">
+    <div class="hero-tag" style="color:var(--green)">Gestión de Riesgo</div>
+    <h2>Calculadora</h2>
+    <p style="color:var(--muted)">Tamaño de posición y ratio R/R en tiempo real.</p>
+  </div>
+  <div class="section-label">Tamaño de posición</div>
   <div class="card">
-    <div class="card-title">Tamaño de Posición</div>
+    <div class="card-glow"></div>
     <div class="formula">Tamaño ($) = Capital × Riesgo% / SL%</div>
     <div class="calc-row">
-      <div class="calc-field">
-        <div class="calc-label">Capital (USDT)</div>
-        <input class="calc-input" id="cap" type="number" placeholder="500" oninput="calcPos()">
-      </div>
-      <div class="calc-field">
-        <div class="calc-label">Riesgo %</div>
-        <input class="calc-input" id="risk" type="number" placeholder="1" max="2" oninput="calcPos()">
-      </div>
+      <div class="calc-field"><div class="calc-label">Capital (USDT)</div><input class="calc-input" id="cap" type="number" placeholder="500" oninput="calcPos()"></div>
+      <div class="calc-field"><div class="calc-label">Riesgo %</div><input class="calc-input" id="risk" type="number" placeholder="1" oninput="calcPos()"></div>
     </div>
     <div class="calc-row">
-      <div class="calc-field">
-        <div class="calc-label">Distancia SL %</div>
-        <input class="calc-input" id="sl" type="number" placeholder="2" oninput="calcPos()">
-      </div>
-      <div class="calc-field">
-        <div class="calc-label">Apalancamiento</div>
-        <input class="calc-input" id="lev" type="number" placeholder="3" max="10" oninput="calcPos()">
-      </div>
+      <div class="calc-field"><div class="calc-label">Distancia SL %</div><input class="calc-input" id="sl" type="number" placeholder="2" oninput="calcPos()"></div>
+      <div class="calc-field"><div class="calc-label">Apalancamiento</div><input class="calc-input" id="lev" type="number" placeholder="3" oninput="calcPos()"></div>
     </div>
     <div id="pos-result" class="calc-result" style="display:none">
       <div class="calc-result-row"><span class="calc-result-key">Riesgo máximo</span><span class="calc-result-val" id="res-riesgo">—</span></div>
       <div class="calc-result-row"><span class="calc-result-key">Posición total</span><span class="calc-result-val" id="res-pos">—</span></div>
       <div class="calc-result-row"><span class="calc-result-key">Margen necesario</span><span class="calc-result-val" id="res-margin">—</span></div>
-      <div class="calc-result-row"><span class="calc-result-key">Liq. aprox.</span><span class="calc-result-val" id="res-liq">—</span></div>
+      <div class="calc-result-row"><span class="calc-result-key">% para liquidar</span><span class="calc-result-val" id="res-liq">—</span></div>
     </div>
   </div>
-
+  <div class="section-label">Ratio R/R</div>
   <div class="card">
-    <div class="card-title">Ratio R/R</div>
-    <div class="calc-row">
-      <div class="calc-field">
-        <div class="calc-label">Entrada</div>
-        <input class="calc-input" id="entry" type="number" placeholder="100" oninput="calcRR()">
-      </div>
+    <div class="card-glow"></div>
+    <div class="calc-row" style="grid-template-columns:1fr">
+      <div class="calc-field"><div class="calc-label">Precio de Entrada</div><input class="calc-input" id="entry" type="number" placeholder="100" oninput="calcRR()"></div>
     </div>
     <div class="calc-row">
-      <div class="calc-field">
-        <div class="calc-label">Stop Loss</div>
-        <input class="calc-input" id="sl2" type="number" placeholder="97" oninput="calcRR()">
-      </div>
-      <div class="calc-field">
-        <div class="calc-label">Take Profit</div>
-        <input class="calc-input" id="tp" type="number" placeholder="107" oninput="calcRR()">
-      </div>
+      <div class="calc-field"><div class="calc-label">Stop Loss</div><input class="calc-input" id="sl2" type="number" placeholder="97" oninput="calcRR()"></div>
+      <div class="calc-field"><div class="calc-label">Take Profit</div><input class="calc-input" id="tp" type="number" placeholder="107" oninput="calcRR()"></div>
     </div>
     <div id="rr-result" class="calc-result" style="display:none">
       <div class="calc-result-row"><span class="calc-result-key">Riesgo</span><span class="calc-result-val" id="rr-risk">—</span></div>
       <div class="calc-result-row"><span class="calc-result-key">Recompensa</span><span class="calc-result-val" id="rr-rew">—</span></div>
       <div class="calc-result-row"><span class="calc-result-key">Ratio R/R</span><span class="calc-result-val" id="rr-val">—</span></div>
-      <div class="calc-result-row"><span class="calc-result-key">Válido</span><span class="calc-result-val" id="rr-ok">—</span></div>
+      <div class="calc-result-row"><span class="calc-result-key">¿Válido?</span><span class="calc-result-val" id="rr-ok">—</span></div>
     </div>
   </div>
 </div>
 
-<!-- ─── PARES ─── -->
+<!-- PARES -->
+
 <div id="pares" class="section">
-  <div class="section-title">Clasificación de Pares</div>
-
-  <div class="alert alert-red">
-    <span class="alert-icon">⚠️</span>
-    <span>Si BTC cae fuerte en diario → no abres largos en ninguna altcoin ese día, aunque el setup parezca perfecto.</span>
-  </div>
-
-  <div class="pairs-grid">
-    <div class="pair-card">
-      <div class="pair-header cat-a">
-        <div class="pair-cat">Cat. A · Large Caps</div>
-        <span class="pill pill-green">Sin restricción</span>
-      </div>
-      <div class="pair-body">
-        <div class="pair-row"><span class="pair-key">Activos</span><span class="pair-val">BTC, ETH</span></div>
-        <div class="pair-row"><span class="pair-key">Volumen</span><span class="pair-val">>100M USDT/día</span></div>
-        <div class="pair-row"><span class="pair-key">R/R mín.</span><span class="pair-val">1:2</span></div>
-        <div class="pair-row"><span class="pair-key">Sesiones</span><span class="pair-val">A, B y C</span></div>
-      </div>
-    </div>
-    <div class="pair-card">
-      <div class="pair-header cat-b">
-        <div class="pair-cat">Cat. B · Mid Caps</div>
-        <span class="pill pill-blue">Ventanas A+B</span>
-      </div>
-      <div class="pair-body">
-        <div class="pair-row"><span class="pair-key">Activos</span><span class="pair-val">SOL, XRP, BNB, HYPE…</span></div>
-        <div class="pair-row"><span class="pair-key">Volumen</span><span class="pair-val">50-100M USDT/día</span></div>
-        <div class="pair-row"><span class="pair-key">R/R mín.</span><span class="pair-val">1:2.5</span></div>
-        <div class="pair-row"><span class="pair-key">Volumen</span><span class="pair-val">Obligatorio (no modificador)</span></div>
-      </div>
-    </div>
-    <div class="pair-card">
-      <div class="pair-header cat-c">
-        <div class="pair-cat">Cat. C · Small Caps</div>
-        <span class="pill pill-red">NO operar</span>
-      </div>
-      <div class="pair-body">
-        <div class="pair-row"><span class="pair-key">Activos</span><span class="pair-val">Resto</span></div>
-        <div class="pair-row"><span class="pair-key">Volumen</span><span class="pair-val">&lt;50M USDT/día</span></div>
-        <div class="pair-row"><span class="pair-key">Motivo</span><span class="pair-val">Manipulación + spread alto</span></div>
-      </div>
-    </div>
-  </div>
-
+  <div class="alert alert-red"><span class="alert-icon">⚠️</span><span><strong>Regla BTC:</strong> Si BTC cae fuerte en diario → no abres largos en ninguna altcoin ese día.</span></div>
+  <div class="section-label">Clasificación por volumen</div>
+  <div class="pair-card"><div class="pair-header cat-a"><div class="pair-cat">Cat. A · Large Caps</div><span class="pill pill-green">Sin restricción</span></div><div class="pair-body"><div class="pair-row"><span class="pair-key">Activos</span><span class="pair-val">BTC · ETH</span></div><div class="pair-row"><span class="pair-key">Volumen</span><span class="pair-val">&gt;100M USDT/día</span></div><div class="pair-row"><span class="pair-key">R/R mínimo</span><span class="pair-val">1:2</span></div><div class="pair-row"><span class="pair-key">Sesiones</span><span class="pair-val">A, B y C</span></div></div></div>
+  <div class="pair-card"><div class="pair-header cat-b"><div class="pair-cat">Cat. B · Mid Caps</div><span class="pill pill-blue">Solo A + B</span></div><div class="pair-body"><div class="pair-row"><span class="pair-key">Activos</span><span class="pair-val">SOL · XRP · BNB · HYPE…</span></div><div class="pair-row"><span class="pair-key">Volumen</span><span class="pair-val">50–100M USDT/día</span></div><div class="pair-row"><span class="pair-key">R/R mínimo</span><span class="pair-val">1:2.5</span></div><div class="pair-row"><span class="pair-key">Volumen</span><span class="pair-val">Obligatorio</span></div></div></div>
+  <div class="pair-card"><div class="pair-header cat-c"><div class="pair-cat">Cat. C · Small Caps</div><span class="pill pill-red">NO operar</span></div><div class="pair-body"><div class="pair-row"><span class="pair-key">Activos</span><span class="pair-val">Resto</span></div><div class="pair-row"><span class="pair-key">Volumen</span><span class="pair-val">&lt;50M USDT/día</span></div><div class="pair-row"><span class="pair-key">Motivo</span><span class="pair-val">Manipulación + spread</span></div></div></div>
   <div class="divider"></div>
-  <div class="card">
-    <div class="card-title">Regla EMA 50D</div>
-    <table class="data-table">
-      <tr><th>Posición precio</th><th>Dirección</th></tr>
-      <tr><td>Encima EMA 50D</td><td><span class="pill pill-green">Solo LARGOS</span></td></tr>
-      <tr><td>Debajo EMA 50D</td><td><span class="pill pill-red">Solo CORTOS</span></td></tr>
-      <tr><td>Tocando EMA 50D</td><td><span class="pill pill-yellow">No operas</span></td></tr>
-      <tr><td>Cruce reciente &lt;3 velas</td><td><span class="pill pill-yellow">No operas</span></td></tr>
-    </table>
-  </div>
+  <div class="section-label">Filtro EMA 50 Diario</div>
+  <div class="card"><div class="card-glow"></div><table class="data-table"><tr><th>Posición precio</th><th>Acción</th></tr><tr><td>Encima EMA 50D</td><td><span class="pill pill-green">Solo LARGOS</span></td></tr><tr><td>Debajo EMA 50D</td><td><span class="pill pill-red">Solo CORTOS</span></td></tr><tr><td>Tocando EMA 50D</td><td><span class="pill pill-yellow">No operas</span></td></tr><tr><td>Cruce reciente &lt;3 velas</td><td><span class="pill pill-yellow">No operas</span></td></tr></table></div>
 </div>
 
-<!-- ─── INVALIDACIÓN ─── -->
+<!-- INVALIDACIÓN -->
+
 <div id="invalida" class="section">
-  <div class="section-title">Reglas de Invalidación</div>
-
-  <div class="alert alert-yellow">
-    <span class="alert-icon">☝️</span>
-    <span>Estas condiciones invalidan cualquier setup por bueno que parezca. Sin excepciones.</span>
+  <div class="hero" style="background:linear-gradient(135deg,rgba(255,77,109,0.1),rgba(251,113,133,0.05));border-color:rgba(255,77,109,0.2)">
+    <div class="hero-tag" style="color:var(--red)">Reglas Absolutas</div>
+    <h2>Invalidación</h2>
+    <p style="color:var(--muted)">Invalidan cualquier setup por bueno que parezca. Sin excepciones.</p>
   </div>
-
-  <div class="inv-list">
-    <div class="inv-item"><div class="inv-icon">✕</div><div><div class="inv-text">EMA 21 plana en 4H</div><div class="inv-sub">Mercado indeciso. Espera a que retome pendiente.</div></div></div>
-    <div class="inv-item"><div class="inv-icon">✕</div><div><div class="inv-text">Score 4H &lt; 3/5</div><div class="inv-sub">Setup insuficiente.</div></div></div>
-    <div class="inv-item"><div class="inv-icon">✕</div><div><div class="inv-text">Precio en medio del rango</div><div class="inv-sub">Solo operas en extremos. Espera a que llegue a la zona.</div></div></div>
-    <div class="inv-item"><div class="inv-icon">✕</div><div><div class="inv-text">R/R &lt; 1:2 (o &lt;1:2.5 mid-caps)</div><div class="inv-sub">Matemáticamente no compensa el riesgo.</div></div></div>
-    <div class="inv-item"><div class="inv-icon">✕</div><div><div class="inv-text">Sin zona S/R clara en 4H</div><div class="inv-sub">Sin referencia de precio, no hay donde poner el SL.</div></div></div>
-    <div class="inv-item"><div class="inv-icon">✕</div><div><div class="inv-text">Sin vela de rechazo en 15M</div><div class="inv-sub">Sin confirmación de entrada, el timing es malo.</div></div></div>
-    <div class="inv-item"><div class="inv-icon">✕</div><div><div class="inv-text">Ruptura de zona con volumen alto</div><div class="inv-sub">La zona ha fallado. No entras o sales si ya estabas.</div></div></div>
-    <div class="inv-item"><div class="inv-icon">✕</div><div><div class="inv-text">BTC cayendo fuerte (altcoins)</div><div class="inv-sub">Las altcoins siguen a BTC en caídas.</div></div></div>
-    <div class="inv-item"><div class="inv-icon">✕</div><div><div class="inv-text">Cruce reciente EMA 50D (&lt;3 velas)</div><div class="inv-sub">Los cruces frescos son trampas frecuentes en cripto.</div></div></div>
-    <div class="inv-item"><div class="inv-icon">✕</div><div><div class="inv-text">Menos de 2h en la ventana horaria</div><div class="inv-sub">Sin tiempo suficiente para que el setup se desarrolle.</div></div></div>
-    <div class="inv-item"><div class="inv-icon">✕</div><div><div class="inv-text">Par Cat. C (&lt;50M vol/día)</div><div class="inv-sub">Esta estrategia no aplica a small caps.</div></div></div>
-  </div>
+  <div class="inv-item"><div class="inv-x">✕</div><div><div class="inv-text">EMA 21 plana en 4H</div><div class="inv-sub">Espera a que retome pendiente.</div></div></div>
+  <div class="inv-item"><div class="inv-x">✕</div><div><div class="inv-text">Score 4H &lt; 3/5</div><div class="inv-sub">Setup insuficiente.</div></div></div>
+  <div class="inv-item"><div class="inv-x">✕</div><div><div class="inv-text">Precio en medio del rango</div><div class="inv-sub">Solo operas en extremos.</div></div></div>
+  <div class="inv-item"><div class="inv-x">✕</div><div><div class="inv-text">R/R &lt; 1:2 (mid-caps &lt;1:2.5)</div><div class="inv-sub">Matemáticamente no compensa.</div></div></div>
+  <div class="inv-item"><div class="inv-x">✕</div><div><div class="inv-text">Sin zona S/R clara en 4H</div><div class="inv-sub">Sin referencia, no hay donde poner el SL.</div></div></div>
+  <div class="inv-item"><div class="inv-x">✕</div><div><div class="inv-text">Sin vela de rechazo en 15M</div><div class="inv-sub">Sin confirmación, el timing es malo.</div></div></div>
+  <div class="inv-item"><div class="inv-x">✕</div><div><div class="inv-text">Ruptura de zona con volumen alto</div><div class="inv-sub">La zona ha fallado. No entras o sales si ya estabas.</div></div></div>
+  <div class="inv-item"><div class="inv-x">✕</div><div><div class="inv-text">BTC cayendo fuerte (altcoins)</div><div class="inv-sub">Las altcoins siguen a BTC en caídas.</div></div></div>
+  <div class="inv-item"><div class="inv-x">✕</div><div><div class="inv-text">Cruce reciente EMA 50D &lt;3 velas</div><div class="inv-sub">Cruces frescos son trampas frecuentes.</div></div></div>
+  <div class="inv-item"><div class="inv-x">✕</div><div><div class="inv-text">Menos de 2h en la ventana horaria</div><div class="inv-sub">Sin tiempo para que el setup se desarrolle.</div></div></div>
+  <div class="inv-item"><div class="inv-x">✕</div><div><div class="inv-text">Par Cat. C (&lt;50M vol/día)</div><div class="inv-sub">Esta estrategia no aplica a small caps.</div></div></div>
 </div>
 
-<!-- ─── SESIONES ─── -->
+<!-- SESIONES -->
+
 <div id="sesiones" class="section">
-  <div class="section-title">Ventanas Horarias (CEST)</div>
-
-  <div class="alert alert-red">
-    <span class="alert-icon">🔇</span>
-    <span>No abrir trades después de las 21:00. Necesitas mínimo 2h por delante en la ventana.</span>
-  </div>
-
-  <div class="sessions">
-    <div class="session">
-      <div class="session-time">09:00–12:00</div>
-      <div class="session-info">
-        <div class="session-name">Ventana A · Apertura Londres</div>
-        <div class="session-sub">Válida para Cat. A y B</div>
-      </div>
-    </div>
-    <div class="session">
-      <div class="session-time">15:00–18:00</div>
-      <div class="session-info">
-        <div class="session-name">Ventana B · New York Overlap ⭐</div>
-        <div class="session-sub">La mejor — mayor volumen del día. Válida Cat. A y B</div>
-      </div>
-    </div>
-    <div class="session">
-      <div class="session-time">19:00–21:00</div>
-      <div class="session-info">
-        <div class="session-name">Ventana C · New York tarde</div>
-        <div class="session-sub">Volumen reduciéndose. Solo Cat. A (BTC, ETH)</div>
-      </div>
-    </div>
-    <div class="session">
-      <div class="session-time restricted">00:00–08:00</div>
-      <div class="session-info">
-        <div class="session-name" style="color:var(--red)">Sesión Asiática · NO OPERAR</div>
-        <div class="session-sub">Volumen bajo en altcoins. Muchas trampas.</div>
-      </div>
-    </div>
-  </div>
+  <div class="alert alert-yellow"><span class="alert-icon">⏱</span><span>No abrir trades después de las 21:00. Necesitas mínimo <strong>2h por delante</strong> en la ventana.</span></div>
+  <div class="section-label">Ventanas CEST</div>
+  <div class="session"><div class="session-dot"></div><div><div class="session-time">09:00–12:00</div><div class="session-name">Ventana A · Apertura Londres</div><div class="session-sub">Cat. A y B</div></div></div>
+  <div class="session"><div class="session-dot"></div><div><div class="session-time">15:00–18:00</div><div class="session-name">Ventana B · NY Overlap ⭐ La mejor</div><div class="session-sub">Mayor volumen del día · Cat. A y B</div></div></div>
+  <div class="session"><div class="session-dot"></div><div><div class="session-time">19:00–21:00</div><div class="session-name">Ventana C · New York tarde</div><div class="session-sub">Volumen reduciéndose · Solo Cat. A</div></div></div>
+  <div class="session restricted"><div class="session-dot"></div><div><div class="session-time">00:00–08:00</div><div class="session-name" style="color:var(--red)">Sesión Asiática · NO OPERAR</div><div class="session-sub">Volumen bajo en altcoins. Muchas trampas.</div></div></div>
 </div>
 
-<!-- ─── GESTIÓN ─── -->
+<!-- GESTIÓN -->
+
 <div id="gestion" class="section">
-  <div class="section-title">Gestión Post-Entrada</div>
-
-  <div class="card">
-    <div class="card-title">Regla 1 · Break Even</div>
-    <div class="alert alert-green" style="margin-bottom:0">
-      <span class="alert-icon">✓</span>
-      <span>Cuando el precio recorre el <strong>50% del camino hacia el TP</strong> → mueve SL al precio de entrada. El trade no puede acabar en pérdida.</span>
-    </div>
+  <div class="rule-card">
+    <div class="card-title card-title-green">Regla 1 · Break Even</div>
+    <div class="alert alert-green" style="margin-bottom:0"><span class="alert-icon">✓</span><span>Al 50% del recorrido hacia TP → mueve SL al precio de entrada. El trade no puede acabar en pérdida.</span></div>
   </div>
-
-  <div class="card">
+  <div class="rule-card">
     <div class="card-title">Regla 2 · Salida Parcial</div>
     <table class="data-table">
       <tr><th>Escenario</th><th>Acción</th></tr>
-      <tr>
-        <td>Subida normal</td>
-        <td>En TP → cierra 70%. Deja 30% con SL en break even hasta señal de reversión.</td>
-      </tr>
-      <tr>
-        <td>Subida fuerte</td>
-        <td>Vela envolvente + volumen notablemente superior. En TP → cierra 30–50%. Define TP2 en siguiente resistencia 4H.</td>
-      </tr>
+      <tr><td>Subida normal</td><td>En TP → cierra 70%. Deja 30% con SL en break even hasta reversión.</td></tr>
+      <tr><td>Subida fuerte</td><td>Envolvente + volumen alto. En TP → cierra 30–50%. Define TP2 en siguiente resistencia 4H.</td></tr>
     </table>
-    <div style="margin-top:12px;font-size:12px;color:var(--muted)">Señales de reversión para salir del 30% restante: vela envolvente en contra 4H · precio toca TP2 · EMA 21 se aplana · Cipher B punto rojo en sobrecompra</div>
+    <div style="margin-top:12px;font-size:12px;color:var(--muted)">Señales para salir del 30% restante: vela envolvente en contra 4H · TP2 · EMA 21 se aplana · Cipher B punto rojo en sobrecompra</div>
   </div>
-
-  <div class="card">
-    <div class="card-title">Regla 3 · Salida Total Inmediata</div>
-    <div class="inv-list">
-      <div class="inv-item"><div class="inv-icon">⚡</div><div><div class="inv-text">Precio rompe zona S/R con vela de cierre 4H + volumen alto</div></div></div>
-      <div class="inv-item"><div class="inv-icon">⚡</div><div><div class="inv-text">EMA 21 en 4H cruza en contra y se aplana</div></div></div>
-      <div class="inv-item"><div class="inv-icon">⚡</div><div><div class="inv-text">Diario cierra al otro lado de la EMA 50</div></div></div>
-    </div>
+  <div class="rule-card">
+    <div class="card-title" style="color:var(--red)">Regla 3 · Salida Total 100%</div>
+    <div class="inv-item"><div class="inv-x">⚡</div><div><div class="inv-text">Precio rompe zona S/R con vela cierre 4H + volumen alto</div></div></div>
+    <div class="inv-item" style="margin-top:7px"><div class="inv-x">⚡</div><div><div class="inv-text">EMA 21 en 4H cruza en contra y se aplana</div></div></div>
+    <div class="inv-item" style="margin-top:7px"><div class="inv-x">⚡</div><div><div class="inv-text">Diario cierra al otro lado de la EMA 50</div></div></div>
   </div>
-
+  <div class="section-label">Apalancamiento · Referencia</div>
   <div class="card">
-    <div class="card-title">Apalancamiento · Referencia</div>
+    <div class="card-glow"></div>
     <table class="data-table">
       <tr><th>Apalancamiento</th><th>Movimiento para liquidar</th></tr>
       <tr><td>2x</td><td>50% en contra</td></tr>
@@ -949,121 +405,75 @@
       <tr><td>10x</td><td>10% en contra</td></tr>
       <tr><td>20x</td><td>5% en contra</td></tr>
     </table>
-    <div class="alert alert-yellow" style="margin-top:12px;margin-bottom:0">
-      <span class="alert-icon">☝️</span>
-      <span>Principiantes: margen aislado + 2x–5x máximo. El apalancamiento no aumenta el acierto, solo amplifica el resultado.</span>
-    </div>
+    <div class="alert alert-yellow" style="margin-top:14px;margin-bottom:0"><span class="alert-icon">☝️</span><span>Margen aislado + 2x–5x máximo. El apalancamiento no aumenta el acierto, solo amplifica el resultado.</span></div>
   </div>
 </div>
 
 <script>
-// TAB NAVIGATION
-function showTab(id) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+function showTab(id,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  event.target.classList.add('active');
-  window.scrollTo(0, 0);
+  el.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
 }
-
-// CHECKLIST
-const checked = new Array(8).fill(false);
-function toggleCheck(el, idx) {
-  checked[idx] = !checked[idx];
-  el.classList.toggle('checked', checked[idx]);
+const checked=new Array(8).fill(false);
+function toggleCheck(el,idx){
+  checked[idx]=!checked[idx];
+  el.classList.toggle('checked',checked[idx]);
   updateScore();
 }
-
-function updateScore() {
-  const score4h = checked.slice(0, 5).filter(Boolean).length;
-  const disp = document.getElementById('score-display');
-  const verdict = document.getElementById('score-verdict');
-  const bars = document.querySelectorAll('#score-bars .score-bar');
-
-  disp.textContent = score4h + '/5';
-
-  bars.forEach((bar, i) => {
-    bar.classList.remove('filled', 'warn', 'fail');
-    if (i < score4h) {
-      bar.classList.add(score4h >= 3 ? 'filled' : (score4h === 2 ? 'warn' : 'fail'));
-    }
-  });
-
-  if (score4h >= 3) {
-    disp.className = 'score-display';
-    verdict.style.color = 'var(--green)';
-    verdict.textContent = '✓ Setup válido — baja a 15M';
-  } else if (score4h === 2) {
-    disp.className = 'score-display warn';
-    verdict.style.color = 'var(--yellow)';
-    verdict.textContent = 'Insuficiente — espera';
-  } else {
-    disp.className = 'score-display fail';
-    verdict.style.color = 'var(--red)';
-    verdict.textContent = 'No hay trade';
-  }
+function updateScore(){
+  const s=checked.slice(0,5).filter(Boolean).length;
+  const d=document.getElementById('score-display');
+  const v=document.getElementById('score-verdict');
+  const bars=document.querySelectorAll('#score-bars .score-bar');
+  d.textContent=s+'/5';
+  bars.forEach((b,i)=>{b.classList.remove('filled','warn','fail');if(i<s)b.classList.add(s>=3?'filled':s===2?'warn':'fail');});
+  if(s>=3){d.className='score-display';v.style.color='var(--green)';v.textContent='✓ Setup válido — baja a 15M';}
+  else if(s===2){d.className='score-display warn';v.style.color='var(--yellow)';v.textContent='Insuficiente — espera';}
+  else{d.className='score-display fail';v.style.color='var(--red)';v.textContent='No hay trade';}
 }
-
-function resetChecklist() {
+function resetChecklist(){
   checked.fill(false);
-  document.querySelectorAll('.check-item').forEach(el => el.classList.remove('checked'));
-  document.getElementById('score-display').textContent = '0/5';
-  document.getElementById('score-display').className = 'score-display';
-  document.getElementById('score-verdict').textContent = 'Marca condiciones';
-  document.getElementById('score-verdict').style.color = 'var(--muted)';
-  document.querySelectorAll('#score-bars .score-bar').forEach(b => b.classList.remove('filled','warn','fail'));
+  document.querySelectorAll('.check-item').forEach(el=>el.classList.remove('checked'));
+  document.getElementById('score-display').textContent='0/5';
+  document.getElementById('score-display').className='score-display';
+  document.getElementById('score-verdict').textContent='Marca las condiciones';
+  document.getElementById('score-verdict').style.color='var(--muted)';
+  document.querySelectorAll('#score-bars .score-bar').forEach(b=>b.classList.remove('filled','warn','fail'));
 }
-
-// CALCULADORA POSICIÓN
-function calcPos() {
-  const cap = parseFloat(document.getElementById('cap').value);
-  const risk = parseFloat(document.getElementById('risk').value) || 1;
-  const sl = parseFloat(document.getElementById('sl').value);
-  const lev = parseFloat(document.getElementById('lev').value) || 1;
-  const res = document.getElementById('pos-result');
-
-  if (!cap || !sl) { res.style.display = 'none'; return; }
-
-  const riesgo = cap * (risk / 100);
-  const posicion = riesgo / (sl / 100);
-  const margen = posicion / lev;
-  const liqPct = (100 / lev).toFixed(1);
-
-  document.getElementById('res-riesgo').textContent = riesgo.toFixed(2) + ' USDT';
-  document.getElementById('res-pos').textContent = posicion.toFixed(2) + ' USDT';
-  document.getElementById('res-margin').textContent = margen.toFixed(2) + ' USDT';
-  document.getElementById('res-liq').textContent = liqPct + '% contra ti';
-
-  const levEl = document.getElementById('res-liq');
-  levEl.className = 'calc-result-val' + (lev > 5 ? ' warn' : '');
-
-  res.style.display = 'block';
+function calcPos(){
+  const cap=parseFloat(document.getElementById('cap').value);
+  const risk=parseFloat(document.getElementById('risk').value)||1;
+  const sl=parseFloat(document.getElementById('sl').value);
+  const lev=parseFloat(document.getElementById('lev').value)||1;
+  const res=document.getElementById('pos-result');
+  if(!cap||!sl){res.style.display='none';return;}
+  const r=cap*(risk/100),p=r/(sl/100),m=p/lev,liq=(100/lev).toFixed(1);
+  document.getElementById('res-riesgo').textContent=r.toFixed(2)+' USDT';
+  document.getElementById('res-pos').textContent=p.toFixed(2)+' USDT';
+  document.getElementById('res-margin').textContent=m.toFixed(2)+' USDT';
+  const le=document.getElementById('res-liq');le.textContent=liq+'% en contra';le.className='calc-result-val'+(lev>5?' warn':'');
+  res.style.display='block';
 }
-
-// CALCULADORA R/R
-function calcRR() {
-  const entry = parseFloat(document.getElementById('entry').value);
-  const sl2 = parseFloat(document.getElementById('sl2').value);
-  const tp = parseFloat(document.getElementById('tp').value);
-  const res = document.getElementById('rr-result');
-
-  if (!entry || !sl2 || !tp) { res.style.display = 'none'; return; }
-
-  const risk = Math.abs(entry - sl2);
-  const reward = Math.abs(tp - entry);
-  const rr = reward / risk;
-
-  document.getElementById('rr-risk').textContent = risk.toFixed(4) + ' (' + (risk/entry*100).toFixed(2) + '%)';
-  document.getElementById('rr-rew').textContent = reward.toFixed(4) + ' (' + (reward/entry*100).toFixed(2) + '%)';
-  document.getElementById('rr-val').textContent = '1:' + rr.toFixed(2);
-
-  const okEl = document.getElementById('rr-ok');
-  if (rr >= 2) { okEl.textContent = '✓ Válido'; okEl.className = 'calc-result-val'; }
-  else if (rr >= 1.5) { okEl.textContent = '⚠ Límite (mid-caps: no)'; okEl.className = 'calc-result-val warn'; }
-  else { okEl.textContent = '✕ No entras'; okEl.className = 'calc-result-val fail'; }
-
-  res.style.display = 'block';
+function calcRR(){
+  const e=parseFloat(document.getElementById('entry').value);
+  const s=parseFloat(document.getElementById('sl2').value);
+  const t=parseFloat(document.getElementById('tp').value);
+  const res=document.getElementById('rr-result');
+  if(!e||!s||!t){res.style.display='none';return;}
+  const ri=Math.abs(e-s),rw=Math.abs(t-e),rr=rw/ri;
+  document.getElementById('rr-risk').textContent=ri.toFixed(4)+' ('+((ri/e)*100).toFixed(2)+'%)';
+  document.getElementById('rr-rew').textContent=rw.toFixed(4)+' ('+((rw/e)*100).toFixed(2)+'%)';
+  document.getElementById('rr-val').textContent='1:'+rr.toFixed(2);
+  const ok=document.getElementById('rr-ok');
+  if(rr>=2){ok.textContent='✓ Válido';ok.className='calc-result-val';}
+  else if(rr>=1.5){ok.textContent='⚠ Límite (mid-caps: no)';ok.className='calc-result-val warn';}
+  else{ok.textContent='✕ No entras';ok.className='calc-result-val fail';}
+  res.style.display='block';
 }
 </script>
+
 </body>
 </html>
