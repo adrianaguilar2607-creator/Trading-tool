@@ -1,5 +1,5 @@
-const CACHE='mis-visitas-v3';
-const FILES=['./','./index.html','./manifest.webmanifest','./icon.svg','./road-v2.js'];
+const CACHE='mis-visitas-v5';
+const FILES=['./','./index.html','./manifest.webmanifest','./icon.svg','./road-v2.js','./school-v4.js'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('mis-visitas-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{
