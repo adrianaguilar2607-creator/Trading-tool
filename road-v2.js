@@ -145,3 +145,49 @@ document.addEventListener('click',async e=>{
     toast('Punto actualizado. La matriz de carreteras deberá recalcularse');
   }catch(error){toast('Búsqueda: '+error.message)}finally{geocodeBusy=false;element.disabled=false;}
 });
+
+const homeEditor=document.createElement('details');
+homeEditor.id='homeOriginEditor';homeEditor.className='info-note';homeEditor.style.marginTop='12px';
+homeEditor.innerHTML='<summary style="font-weight:700;cursor:pointer">📍 Revisar salida y regreso: Sant Adrià 30</summary><p class="muted">Las coordenadas de la base también son orientativas. Puedes corregirlas manualmente o buscar una propuesta en OpenStreetMap. El cambio recalcula las visitas y deja obsoleta la matriz anterior.</p><div class="form-panel"><label>Dirección de origen y regreso</label><input id="homeAddress" autocomplete="off"><label>Latitud</label><input id="homeLat" inputmode="decimal"><label>Longitud</label><input id="homeLon" inputmode="decimal"><button class="secondary" type="button" id="searchHome">Buscar coordenadas (internet)</button><button class="primary" type="button" id="saveHome">Guardar ubicación de salida</button></div>';
+roadPanel.appendChild(homeEditor);
+function syncHomeInputs(){
+ if(!store)return;
+ if(document.activeElement?.closest?.('#homeOriginEditor'))return;
+ document.getElementById('homeAddress').value=store.settings.origin;
+ document.getElementById('homeLat').value=String(store.settings.originLat);
+ document.getElementById('homeLon').value=String(store.settings.originLon);
+}
+const savedRenderAll=renderAll;
+renderAll=function(){savedRenderAll();syncHomeInputs()};
+document.getElementById('saveHome').addEventListener('click',()=>{
+ if(!store)return;
+ const name=document.getElementById('homeAddress').value.trim().slice(0,160),
+ lat=Number(document.getElementById('homeLat').value.replace(',','.')),
+ lon=Number(document.getElementById('homeLon').value.replace(',','.'));
+ if(!name||!(lat>41.25&&lat<41.65&&lon>1.9&&lon<2.35)){toast('Escribe una dirección y coordenadas válidas dentro de Barcelona');return;}
+ store.settings.origin=name;store.settings.originLat=lat;store.settings.originLon=lon;
+ autoPlan(store,nextWorkday(dateMadrid()),50);persist();renderAll();
+ toast('Origen actualizado. Vuelve a calcular tiempos por carretera.');
+});
+document.getElementById('searchHome').addEventListener('click',async e=>{
+ if(!store||geocodeBusy)return;
+ const address=document.getElementById('homeAddress').value.trim();
+ if(!address)return;
+ if(!confirm('Buscar esta dirección en OpenStreetMap: '+address+'? No se envían clientes ni RAE.'))return;
+ geocodeBusy=true;e.currentTarget.disabled=true;
+ try{
+  const delay=Math.max(0,1300-(Date.now()-geocodeLast));if(delay)await new Promise(resolve=>setTimeout(resolve,delay));
+  geocodeLast=Date.now();
+  const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=3&countrycodes=es&q='+encodeURIComponent(address+', Barcelona, Catalunya');
+  const res=await fetch(url,{headers:{Accept:'application/json'},referrerPolicy:'strict-origin-when-cross-origin'});
+  if(!res.ok)throw Error('Geocodificador '+res.status);
+  const choices=(await res.json()).filter(x=>Number(x.lat)>41.25&&Number(x.lat)<41.65&&Number(x.lon)>1.9&&Number(x.lon)<2.35);
+  if(!choices.length)throw Error('No se ha encontrado una ubicación válida');
+  const choice=prompt('Elige una opción de OpenStreetMap:\n'+choices.map((r,i)=>(i+1)+'. '+String(r.display_name).slice(0,145)).join('\n')+'\n\nNúmero:', '1');
+  if(choice===null)return;
+  const found=choices[Number(choice)-1];if(!found)throw Error('Selección no válida');
+  document.getElementById('homeLat').value=Number(found.lat).toFixed(6);
+  document.getElementById('homeLon').value=Number(found.lon).toFixed(6);
+  toast('Coordenadas propuestas. Comprueba y pulsa Guardar ubicación de salida.');
+ }catch(error){toast(error.message)}finally{geocodeBusy=false;e.currentTarget.disabled=false}
+});
