@@ -9,3 +9,7 @@ Aplicación web PWA que funciona sin conexión tras una primera carga. Agrupa as
 **Limitación:** utiliza distancias geográficas aproximadas, no rutas viales ni tráfico en tiempo real; confirmar horarios y entradas antes de visitar.
 
 **Respaldo:** el contenido anterior de Trading-tool está en la rama `respaldo-trading-tool-2026-10-22`.
+
+## Revisión de publicación de GitHub Pages
+
+El sitio se publica desde la rama `main`, carpeta raíz, sin Jekyll.
