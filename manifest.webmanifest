@@ -1,0 +1,18 @@
+{
+  "name": "Mis Visitas · Planificador",
+  "short_name": "Mis Visitas",
+  "description": "Fichas de ascensores y optimización de recorridos offline",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f6fa",
+  "theme_color": "#182c44",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
