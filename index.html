@@ -7,7 +7,8 @@ const {body,css,js}=JSON.parse(unpacked);
 const roadAddon=await fetch('./road-v2.js').then(r=>{if(!r.ok)throw Error('No se pudo cargar el planificador de carreteras');return r.text()}).catch(()=> '');
 document.body.innerHTML=body;
 const style=document.createElement('style');style.textContent=css;document.head.appendChild(style);
-const moduleUrl=URL.createObjectURL(new Blob([js,'\n',roadAddon],{type:'text/javascript'}));
+const schoolAddon=await fetch('./school-v4.js').then(r=>{if(!r.ok)throw Error('No se pudo cargar política de colegios');return r.text()});
+const moduleUrl=URL.createObjectURL(new Blob([js,'\n',roadAddon,'\n',schoolAddon],{type:'text/javascript'}));
 await import(moduleUrl);URL.revokeObjectURL(moduleUrl);
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }catch(err){document.getElementById('loading')?.replaceChildren(document.createTextNode('Error al cargar la aplicación: '+err.message));console.error(err)}
